@@ -51,7 +51,7 @@
 
   <textarea id="memoInput" placeholder="新しいメモを書く"></textarea>
   <button onclick="saveMemo()">保存</button>
-  <button onclick="toggleSort()">並び替え：新しい順</button>
+  <button id="sortBtn" onclick="toggleSort()">並び替え：新しい順</button>
 
   <ul id="memoList"></ul>
 
@@ -117,8 +117,8 @@ function toggleSort() {
     sorted.reverse();
   }
 
-  document.querySelector("button[onclick='toggleSort()']").textContent =
-    "並び替え：" + (sortNewest ? "新しい順" : "古い順");
+  document.getElementById("sortBtn").textContent =
+  "並び替え：" + (sortNewest ? "新しい順" : "古い順");
 
   sorted.forEach((memo, index) => {
     const realIndex = memos.indexOf(memo);
