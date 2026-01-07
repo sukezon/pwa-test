@@ -119,16 +119,36 @@ button:active {
   }
 
   function render() {
+
+document.getElementById("imageInput").addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function () {
+    memos[imageTargetIndex].image = reader.result;
+    localStorage.setItem("memos", JSON.stringify(memos));
+    render();
+  };
+  reader.readAsDataURL(file);
+});
+    
     const list = document.getElementById("memoList");
     list.innerHTML = "";
 
     memos.forEach((memo, index) => {
       const li = document.createElement("li");
       li.innerHTML = `
-        <div>${memo.text.replace(/\n/g, "<br>")}</div>
-        <div class="time">${memo.time}</div>
-        <button onclick="deleteMemo(${index})">削除</button>
-      `;
+  <div>${memo.text.replace(/\n/g, "<br>")}</div>
+  <div class="time">${memo.time}</div>
+
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button onclick="addImage(${realIndex})">📷</button>
+    <button onclick="deleteMemo(${realIndex})">削除</button>
+  </div>
+
+  ${memo.image ? `<img src="${memo.image}" class="memo-image" onclick="toggleImage(this)">` : ""}
+`;
       li.onclick = () => {
         document.getElementById("memoInput").value = memo.text;
         editIndex = index;
@@ -161,10 +181,16 @@ function render() {
 
     const li = document.createElement("li");
     li.innerHTML = `
-      <div>${memo.text.replace(/\n/g, "<br>")}</div>
-      <div class="time">${memo.time}</div>
-      <button onclick="deleteMemo(${realIndex})">削除</button>
-    `;
+  <div>${memo.text.replace(/\n/g, "<br>")}</div>
+  <div class="time">${memo.time}</div>
+
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button onclick="addImage(${realIndex})">📷</button>
+    <button onclick="deleteMemo(${realIndex})">削除</button>
+  </div>
+
+  ${memo.image ? `<img src="${memo.image}" class="memo-image" onclick="toggleImage(this)">` : ""}
+`;
     li.onclick = () => {
       document.getElementById("memoInput").value = memo.text;
       editIndex = realIndex;
@@ -173,6 +199,29 @@ function render() {
   });
 }
 render();
+
+  function addImage(index) {
+  imageTargetIndex = index;
+  document.getElementById("imageInput").click();
+}
+
+  function toggleImage(img) {
+  if (img.parentElement.classList.contains("fullscreen")) {
+    img.parentElement.remove();
+  } else {
+    const overlay = document.createElement("div");
+    overlay.className = "fullscreen";
+    overlay.onclick = () => overlay.remove();
+
+    const bigImg = document.createElement("img");
+    bigImg.src = img.src;
+
+    overlay.appendChild(bigImg);
+    document.body.appendChild(overlay);
+  }
+}
+
+  
 </script>
 </body>
 </html>
