@@ -207,9 +207,8 @@
         <div class="time">${memo.time}</div>
 
         <div class="memo-buttons">
-          <button onclick="addImage(${realIndex})">📷 画像</button>
-          <button onclick="deleteMemo(${realIndex})">削除</button>
-        </div>
+          <button onclick="addImage(${realIndex}); event.stopPropagation();">📷 画像</button>
+          <button onclick="deleteMemo(${realIndex}); event.stopPropagation();">削除</button>        </div>
 
         ${memo.image ? `<img src="${memo.image}" class="memo-image" onclick="toggleImage(this)">` : ""}
       `;
