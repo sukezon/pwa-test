@@ -108,7 +108,10 @@
 
 function toggleSort() {
   sortNewest = !sortNewest;
-  function render() {
+  render();
+}
+
+function render() {
   const list = document.getElementById("memoList");
   list.innerHTML = "";
 
@@ -118,7 +121,7 @@ function toggleSort() {
   }
 
   document.getElementById("sortBtn").textContent =
-  "並び替え：" + (sortNewest ? "新しい順" : "古い順");
+    "並び替え：" + (sortNewest ? "新しい順" : "古い順");
 
   sorted.forEach((memo, index) => {
     const realIndex = memos.indexOf(memo);
@@ -136,9 +139,7 @@ function toggleSort() {
     list.appendChild(li);
   });
 }
-}
-
-  
+render();
 </script>
 </body>
 </html>
