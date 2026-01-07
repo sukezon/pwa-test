@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>メモアプリ</title>
+  <title>複数メモ</title>
 
   <link rel="manifest" href="manifest.json" />
 
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 20px;
+      margin: 15px;
       background: #f7f7f7;
     }
     h1 {
@@ -18,7 +18,7 @@
     }
     textarea {
       width: 100%;
-      height: 60vh;
+      height: 120px;
       font-size: 16px;
       padding: 10px;
       box-sizing: border-box;
@@ -29,57 +29,72 @@
       font-size: 16px;
       width: 100%;
     }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: white;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .time {
+      font-size: 12px;
+      color: gray;
+    }
   </style>
 </head>
 
 <body>
   <h1>📝 メモ</h1>
 
-  <textarea id="memo" placeholder="ここにメモを書いてください"></textarea>
-<p id="time">最終更新：なし</p>
-  
-  <button onclick="clearMemo()">すべて消す</button>
+  <textarea id="memoInput" placeholder="新しいメモを書く"></textarea>
+  <button onclick="saveMemo()">保存</button>
+
+  <ul id="memoList"></ul>
 
   <script>
-  const memo = document.getElementById("memo");
-  const time = document.getElementById("time");
+    let memos = JSON.parse(localStorage.getItem("memos")) || [];
+    let editIndex = null;
 
-  function updateTime() {
-    const now = new Date();
-    const text =
-      now.getFullYear() +
-      "/" +
-      (now.getMonth() + 1) +
-      "/" +
-      now.getDate() +
-      " " +
-      now.getHours() +
-      ":" +
-      now.getMinutes().toString().padStart(2, "0");
+    function saveMemo() {
+      const text = document.getElementById("memoInput").value.trim();
+      if (!text) return;
 
-    time.textContent = "最終更新：" + text;
-    localStorage.setItem("memo_time", text);
-  }
+      const time = new Date().toLocaleString("ja-JP");
 
-  // 起動時に読み込み
-  memo.value = localStorage.getItem("memo") || "";
-  time.textContent =
-    "最終更新：" + (localStorage.getItem("memo_time") || "なし");
+      if (editIndex === null) {
+        memos.unshift({ text, time });
+      } else {
+        memos[editIndex] = { text, time };
+        editIndex = null;
+      }
 
-  // 入力のたびに保存
-  memo.addEventListener("input", () => {
-    localStorage.setItem("memo", memo.value);
-    updateTime();
-  });
-
-  function clearMemo() {
-    if (confirm("本当に消しますか？")) {
-      memo.value = "";
-      localStorage.removeItem("memo");
-      localStorage.removeItem("memo_time");
-      time.textContent = "最終更新：なし";
+      localStorage.setItem("memos", JSON.stringify(memos));
+      document.getElementById("memoInput").value = "";
+      render();
     }
-  }
-</script>
+
+    function render() {
+      const list = document.getElementById("memoList");
+      list.innerHTML = "";
+
+      memos.forEach((memo, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div>${memo.text.replace(/\n/g, "<br>")}</div>
+          <div class="time">${memo.time}</div>
+        `;
+        li.onclick = () => {
+          document.getElementById("memoInput").value = memo.text;
+          editIndex = index;
+        };
+        list.appendChild(li);
+      });
+    }
+
+    render();
+  </script>
 </body>
 </html>
