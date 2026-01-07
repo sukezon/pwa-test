@@ -51,12 +51,14 @@
 
   <textarea id="memoInput" placeholder="新しいメモを書く"></textarea>
   <button onclick="saveMemo()">保存</button>
-
+  <button onclick="toggleSort()">並び替え：新しい順</button>
+  
   <ul id="memoList"></ul>
 
 <script>
   let memos = JSON.parse(localStorage.getItem("memos")) || [];
   let editIndex = null;
+  let sortNewest = true;
 
   function saveMemo() {
     const text = document.getElementById("memoInput").value.trim();
@@ -84,25 +86,38 @@
   }
 
   function render() {
-    const list = document.getElementById("memoList");
-    list.innerHTML = "";
+  const list = document.getElementById("memoList");
+  list.innerHTML = "";
 
-    memos.forEach((memo, index) => {
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <div>${memo.text.replace(/\n/g, "<br>")}</div>
-        <div class="time">${memo.time}</div>
-        <button onclick="deleteMemo(${index})">削除</button>
-      `;
-      li.onclick = () => {
-        document.getElementById("memoInput").value = memo.text;
-        editIndex = index;
-      };
-      list.appendChild(li);
-    });
+  const sorted = [...memos];
+  if (!sortNewest) {
+    sorted.reverse();
   }
 
+  document.querySelector("button[onclick='toggleSort()']").textContent =
+    "並び替え：" + (sortNewest ? "新しい順" : "古い順");
+
+  sorted.forEach((memo, index) => {
+    const realIndex = memos.indexOf(memo);
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div>${memo.text.replace(/\n/g, "<br>")}</div>
+      <div class="time">${memo.time}</div>
+      <button onclick="deleteMemo(${realIndex})">削除</button>
+    `;
+    li.onclick = () => {
+      document.getElementById("memoInput").value = memo.text;
+      editIndex = realIndex;
+    };
+    list.appendChild(li);
+    render();
+  }
+  
+  function toggleSort() {
+  sortNewest = !sortNewest;
   render();
+}
 </script>
 </body>
 </html>
