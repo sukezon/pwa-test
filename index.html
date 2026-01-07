@@ -1,13 +1,61 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PWAテスト</title>
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>メモアプリ</title>
+
+  <link rel="manifest" href="manifest.json" />
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 20px;
+      background: #f7f7f7;
+    }
+    h1 {
+      font-size: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 60vh;
+      font-size: 16px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>PWA 起動成功 🎉</h1>
-  <p>これは iPhone だけで作った PWA です。</p>
+  <h1>📝 メモ</h1>
+
+  <textarea id="memo" placeholder="ここにメモを書いてください"></textarea>
+
+  <button onclick="clearMemo()">すべて消す</button>
+
+  <script>
+    const memo = document.getElementById("memo");
+
+    // 起動時に保存データを読み込む
+    memo.value = localStorage.getItem("memo") || "";
+
+    // 入力が変わるたびに自動保存
+    memo.addEventListener("input", () => {
+      localStorage.setItem("memo", memo.value);
+    });
+
+    function clearMemo() {
+      if (confirm("本当に消しますか？")) {
+        memo.value = "";
+        localStorage.removeItem("memo");
+      }
+    }
+  </script>
 </body>
 </html>
