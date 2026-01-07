@@ -3,22 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>複数メモ</title>
+  <title>メモアプリ</title>
 
   <link rel="manifest" href="manifest.json" />
 
   <style>
     body {
-      <div class="app">
-
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 15px;
-      background: #f7f7f7;
+      background: linear-gradient(180deg, #f5f7fb, #e9eef6);
+      margin: 0;
+      padding: 16px;
     }
-    <img src="icon.png" alt="アイコン" style="width:48px;height:48px;">
+
+    .app {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
     h1 {
       font-size: 20px;
+      margin-bottom: 12px;
+      text-align: center;
     }
+
     textarea {
       width: 100%;
       height: 120px;
@@ -26,72 +37,96 @@
       padding: 10px;
       box-sizing: border-box;
     }
+
     button {
       margin-top: 10px;
       padding: 10px;
       font-size: 16px;
       width: 100%;
+      border-radius: 10px;
+      border: none;
+      background: #007aff;
+      color: #fff;
     }
+
+    button:active {
+      opacity: 0.8;
+    }
+
     ul {
       list-style: none;
       padding: 0;
+      margin-top: 16px;
     }
+
     li {
-      background: white;
+      background: #fff;
       margin-top: 10px;
       padding: 10px;
       border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
+
     .time {
       font-size: 12px;
       color: gray;
+      margin-top: 4px;
     }
 
-    <div style="display:flex;align-items:center;gap:10px;">
-  <img src="icon.png" style="width:40px;height:40px;">
-  <h1>📝 メモ</h1>
-</div>
-body {
-  background: linear-gradient(180deg, #f5f7fb, #e9eef6);
-}
+    .memo-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
 
-.app {
-  max-width: 600px;
-  margin: 0 auto;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-}
+    .memo-buttons button {
+      flex: 1;
+      font-size: 14px;
+      padding: 8px;
+    }
 
-button {
-  border-radius: 10px;
-  border: none;
-  background: #007aff;
-  color: #fff;
-}
+    .memo-image {
+      width: 60px;
+      margin-top: 8px;
+      border-radius: 6px;
+    }
 
-button:active {
-  opacity: 0.8;
-}
+    .fullscreen {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
 
-    
+    .fullscreen img {
+      max-width: 90%;
+      max-height: 90%;
+    }
   </style>
 </head>
 
 <body>
-  <h1>📝 メモ</h1>
+  <div class="app">
+    <h1>📝 メモ</h1>
 
-  <textarea id="memoInput" placeholder="新しいメモを書く"></textarea>
-  <button onclick="saveMemo()">保存</button>
-  <button id="sortBtn" onclick="toggleSort()">並び替え：新しい順</button>
+    <textarea id="memoInput" placeholder="新しいメモを書く"></textarea>
+    <button onclick="saveMemo()">保存</button>
+    <button id="sortBtn" onclick="toggleSort()">並び替え：新しい順</button>
 
-  <ul id="memoList"></ul>
+    <ul id="memoList"></ul>
+  </div>
+
+  <!-- 画像選択用（非表示） -->
+  <input type="file" id="imageInput" accept="image/*" style="display:none;">
 
 <script>
   let memos = JSON.parse(localStorage.getItem("memos")) || [];
   let editIndex = null;
   let sortNewest = true;
+  let imageTargetIndex = null;
 
   function saveMemo() {
     const text = document.getElementById("memoInput").value.trim();
@@ -102,7 +137,7 @@ button:active {
     if (editIndex === null) {
       memos.unshift({ text, time });
     } else {
-      memos[editIndex] = { text, time };
+      memos[editIndex].text = text;
       editIndex = null;
     }
 
@@ -118,97 +153,30 @@ button:active {
     render();
   }
 
-  function render() {
-
-document.getElementById("imageInput").addEventListener("change", function () {
-  const file = this.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function () {
-    memos[imageTargetIndex].image = reader.result;
-    localStorage.setItem("memos", JSON.stringify(memos));
+  function toggleSort() {
+    sortNewest = !sortNewest;
     render();
-  };
-  reader.readAsDataURL(file);
-});
-    
-    const list = document.getElementById("memoList");
-    list.innerHTML = "";
-
-    memos.forEach((memo, index) => {
-      const li = document.createElement("li");
-      li.innerHTML = `
-  <div>${memo.text.replace(/\n/g, "<br>")}</div>
-  <div class="time">${memo.time}</div>
-
-  <div style="display:flex;gap:8px;align-items:center;">
-    <button onclick="addImage(${realIndex})">📷</button>
-    <button onclick="deleteMemo(${realIndex})">削除</button>
-  </div>
-
-  ${memo.image ? `<img src="${memo.image}" class="memo-image" onclick="toggleImage(this)">` : ""}
-`;
-      li.onclick = () => {
-        document.getElementById("memoInput").value = memo.text;
-        editIndex = index;
-      };
-      list.appendChild(li);
-    });
   }
-
-  render();
-
-function toggleSort() {
-  sortNewest = !sortNewest;
-  render();
-}
-
-function render() {
-  const list = document.getElementById("memoList");
-  list.innerHTML = "";
-
-  const sorted = [...memos];
-  if (!sortNewest) {
-    sorted.reverse();
-  }
-
-  document.getElementById("sortBtn").textContent =
-    "並び替え：" + (sortNewest ? "新しい順" : "古い順");
-
-  sorted.forEach((memo, index) => {
-    const realIndex = memos.indexOf(memo);
-
-    const li = document.createElement("li");
-    li.innerHTML = `
-  <div>${memo.text.replace(/\n/g, "<br>")}</div>
-  <div class="time">${memo.time}</div>
-
-  <div style="display:flex;gap:8px;align-items:center;">
-    <button onclick="addImage(${realIndex})">📷</button>
-    <button onclick="deleteMemo(${realIndex})">削除</button>
-  </div>
-
-  ${memo.image ? `<img src="${memo.image}" class="memo-image" onclick="toggleImage(this)">` : ""}
-`;
-    li.onclick = () => {
-      document.getElementById("memoInput").value = memo.text;
-      editIndex = realIndex;
-    };
-    list.appendChild(li);
-  });
-}
-render();
 
   function addImage(index) {
-  imageTargetIndex = index;
-  document.getElementById("imageInput").click();
-}
+    imageTargetIndex = index;
+    document.getElementById("imageInput").click();
+  }
+
+  document.getElementById("imageInput").addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      memos[imageTargetIndex].image = reader.result;
+      localStorage.setItem("memos", JSON.stringify(memos));
+      render();
+    };
+    reader.readAsDataURL(file);
+  });
 
   function toggleImage(img) {
-  if (img.parentElement.classList.contains("fullscreen")) {
-    img.parentElement.remove();
-  } else {
     const overlay = document.createElement("div");
     overlay.className = "fullscreen";
     overlay.onclick = () => overlay.remove();
@@ -219,9 +187,43 @@ render();
     overlay.appendChild(bigImg);
     document.body.appendChild(overlay);
   }
-}
 
-  
+  function render() {
+    const list = document.getElementById("memoList");
+    list.innerHTML = "";
+
+    const sorted = [...memos];
+    if (!sortNewest) sorted.reverse();
+
+    document.getElementById("sortBtn").textContent =
+      "並び替え：" + (sortNewest ? "新しい順" : "古い順");
+
+    sorted.forEach((memo) => {
+      const realIndex = memos.indexOf(memo);
+      const li = document.createElement("li");
+
+      li.innerHTML = `
+        <div>${memo.text.replace(/\n/g, "<br>")}</div>
+        <div class="time">${memo.time}</div>
+
+        <div class="memo-buttons">
+          <button onclick="addImage(${realIndex})">📷 画像</button>
+          <button onclick="deleteMemo(${realIndex})">削除</button>
+        </div>
+
+        ${memo.image ? `<img src="${memo.image}" class="memo-image" onclick="toggleImage(this)">` : ""}
+      `;
+
+      li.onclick = () => {
+        document.getElementById("memoInput").value = memo.text;
+        editIndex = realIndex;
+      };
+
+      list.appendChild(li);
+    });
+  }
+
+  render();
 </script>
 </body>
 </html>
