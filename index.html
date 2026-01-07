@@ -54,47 +54,55 @@
 
   <ul id="memoList"></ul>
 
-  <script>
-    let memos = JSON.parse(localStorage.getItem("memos")) || [];
-    let editIndex = null;
+<script>
+  let memos = JSON.parse(localStorage.getItem("memos")) || [];
+  let editIndex = null;
 
-    function saveMemo() {
-      const text = document.getElementById("memoInput").value.trim();
-      if (!text) return;
+  function saveMemo() {
+    const text = document.getElementById("memoInput").value.trim();
+    if (!text) return;
 
-      const time = new Date().toLocaleString("ja-JP");
+    const time = new Date().toLocaleString("ja-JP");
 
-      if (editIndex === null) {
-        memos.unshift({ text, time });
-      } else {
-        memos[editIndex] = { text, time };
-        editIndex = null;
-      }
-
-      localStorage.setItem("memos", JSON.stringify(memos));
-      document.getElementById("memoInput").value = "";
-      render();
+    if (editIndex === null) {
+      memos.unshift({ text, time });
+    } else {
+      memos[editIndex] = { text, time };
+      editIndex = null;
     }
 
-    function render() {
-      const list = document.getElementById("memoList");
-      list.innerHTML = "";
-
-      memos.forEach((memo, index) => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <div>${memo.text.replace(/\n/g, "<br>")}</div>
-          <div class="time">${memo.time}</div>
-        `;
-        li.onclick = () => {
-          document.getElementById("memoInput").value = memo.text;
-          editIndex = index;
-        };
-        list.appendChild(li);
-      });
-    }
-
+    localStorage.setItem("memos", JSON.stringify(memos));
+    document.getElementById("memoInput").value = "";
     render();
-  </script>
+  }
+
+  function deleteMemo(index) {
+    if (!confirm("このメモを削除しますか？")) return;
+    memos.splice(index, 1);
+    localStorage.setItem("memos", JSON.stringify(memos));
+    render();
+  }
+
+  function render() {
+    const list = document.getElementById("memoList");
+    list.innerHTML = "";
+
+    memos.forEach((memo, index) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div>${memo.text.replace(/\n/g, "<br>")}</div>
+        <div class="time">${memo.time}</div>
+        <button onclick="deleteMemo(${index})">削除</button>
+      `;
+      li.onclick = () => {
+        document.getElementById("memoInput").value = memo.text;
+        editIndex = index;
+      };
+      list.appendChild(li);
+    });
+  }
+
+  render();
+</script>
 </body>
 </html>
