@@ -164,17 +164,46 @@
   }
 
   document.getElementById("imageInput").addEventListener("change", function () {
-    const file = this.files[0];
-    if (!file) return;
+  const file = this.files[0];
+  if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = function () {
-      memos[imageTargetIndex].image = reader.result;
-      localStorage.setItem("memos", JSON.stringify(memos));
-      render();
-    };
-    reader.readAsDataURL(file);
-  });
+  const img = new Image();
+  const reader = new FileReader();
+
+  reader.onload = function () {
+    img.src = reader.result;
+  };
+
+  img.onload = function () {
+    const maxSize = 800; // 最大辺(px)
+    let { width, height } = img;
+
+    if (width > height && width > maxSize) {
+      height = height * (maxSize / width);
+      width = maxSize;
+    } else if (height > maxSize) {
+      width = width * (maxSize / height);
+      height = maxSize;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const compressed = canvas.toDataURL("image/jpeg", 0.7);
+
+    memos[imageTargetIndex].image = compressed;
+    localStorage.setItem("memos", JSON.stringify(memos));
+    render();
+  };
+
+  reader.readAsDataURL(file);
+  this.value = "";
+});
+  
 
   function toggleImage(img) {
     const overlay = document.createElement("div");
