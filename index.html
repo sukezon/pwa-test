@@ -52,7 +52,7 @@
   <textarea id="memoInput" placeholder="新しいメモを書く"></textarea>
   <button onclick="saveMemo()">保存</button>
   <button onclick="toggleSort()">並び替え：新しい順</button>
-  
+
   <ul id="memoList"></ul>
 
 <script>
@@ -86,6 +86,29 @@
   }
 
   function render() {
+    const list = document.getElementById("memoList");
+    list.innerHTML = "";
+
+    memos.forEach((memo, index) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div>${memo.text.replace(/\n/g, "<br>")}</div>
+        <div class="time">${memo.time}</div>
+        <button onclick="deleteMemo(${index})">削除</button>
+      `;
+      li.onclick = () => {
+        document.getElementById("memoInput").value = memo.text;
+        editIndex = index;
+      };
+      list.appendChild(li);
+    });
+  }
+
+  render();
+
+function toggleSort() {
+  sortNewest = !sortNewest;
+  function render() {
   const list = document.getElementById("memoList");
   list.innerHTML = "";
 
@@ -111,16 +134,11 @@
       editIndex = realIndex;
     };
     list.appendChild(li);
-    });
-  }
-
-  render();
-  }
-  
-  function toggleSort() {
-  sortNewest = !sortNewest;
-  render();
+  });
 }
+}
+
+  
 </script>
 </body>
 </html>
